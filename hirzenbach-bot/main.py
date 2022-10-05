@@ -41,6 +41,13 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def there_there(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(f"There there *pats head*")
+    sticker = random.choice(
+        [
+            "CAACAgIAAxkBAAEYu_5jPf5WYDTn3Jc5hRqRw4HvtVTMGgACMQEAAlKJkSNy74zuyFRhcyoE",
+            "CAACAgIAAxkBAAEYvAABYz3-bjX-Po33KiqNVfMqZPNnxfQAAuwAA_cCyA805OGp51WLlyoE",
+        ]
+    )
+    await update.message.reply_sticker(sticker)
 
 
 async def start_add_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
