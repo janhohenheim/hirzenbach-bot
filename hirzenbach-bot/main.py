@@ -18,6 +18,7 @@ import time
 from threading import Thread
 from dotenv import load_dotenv
 import os
+import requests
 
 
 @dataclass(frozen=False)
@@ -95,6 +96,16 @@ async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     await update.message.reply_text("Removed from subscribers")
 
 
+async def inspire(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    response = requests.get("https://inspirobot.me/api?generate=true")
+    # check return code
+    if response.status_code != 200:
+        await update.message.reply_text("Something went wrong :(")
+        return
+    link = response.text
+    await update.message.reply_photo(link)
+
+
 def init_pickle() -> None:
     try:
         Data.read()
@@ -104,6 +115,7 @@ def init_pickle() -> None:
 
 async def run_regular_spam():
     while True:
+        time.sleep(60 * 60)
         data = Data.read()
         bot = telegram.Bot(get_token())
         async with bot:
@@ -115,7 +127,6 @@ async def run_regular_spam():
                     "Time for your scheduled sticker spam! (you can stop this with /unsubscribe)",
                 )
                 await bot.send_sticker(id, sticker_id)
-        time.sleep(60 * 60)
 
 
 def get_token():
@@ -136,6 +147,7 @@ if "__main__" == __name__:
     app.add_handler(CommandHandler("stop_add_sticker", stop_add_sticker))
     app.add_handler(CommandHandler("subscribe", subscribe))
     app.add_handler(CommandHandler("unsubscribe", unsubscribe))
+    app.add_handler(CommandHandler("inspire", inspire))
 
     app.add_handler(MessageHandler(filters.Sticker.ALL, add_sticker))
     app.add_handler(
