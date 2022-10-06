@@ -1,165 +1,43 @@
 #!/usr/bin/env python3
 
 import asyncio
-from typing import Set
-import telegram
-from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
-    ContextTypes,
     MessageHandler,
     filters,
 )
-import random
-from dataclasses import dataclass, field
-import pickle
-import time
 from threading import Thread
-from dotenv import load_dotenv
-import os
-import requests
-
-
-@dataclass(frozen=False)
-class Data:
-    sticker_pool: Set[str] = field(default_factory=set)
-    adding_sticker: bool = False
-    subscribers: Set[int] = field(default_factory=set)
-
-    def read() -> "Data":
-        with open("data.pickle", "rb") as f:
-            return pickle.load(f)
-
-    def write(self) -> None:
-        with open("data.pickle", "wb") as f:
-            pickle.dump(self, f)
+import gpt3
+from env import Env
+from persistance import Data
+import commands
 
 
 def main():
-    load_dotenv()
-    init_pickle()
-    thread = Thread(target=asyncio.run, args=(run_regular_spam(),))
+    Data.init()
+    gpt3.setup_openai()
+    thread = Thread(target=asyncio.run, args=(commands.run_regular_spam(),))
     thread.start()
 
-    app = ApplicationBuilder().token(get_token()).build()
+    app = ApplicationBuilder().token(Env.read().telegram_token).build()
 
-    app.add_handler(CommandHandler("sticker", sticker))
-    app.add_handler(CommandHandler("add_sticker", start_add_sticker))
-    app.add_handler(CommandHandler("help", help))
-    app.add_handler(CommandHandler("stop_add_sticker", stop_add_sticker))
-    app.add_handler(CommandHandler("subscribe", subscribe))
-    app.add_handler(CommandHandler("unsubscribe", unsubscribe))
-    app.add_handler(CommandHandler("inspire", inspire))
+    app.add_handler(CommandHandler("sticker", commands.sticker))
+    app.add_handler(CommandHandler("add_sticker", commands.start_add_sticker))
+    app.add_handler(CommandHandler("help", commands.help))
+    app.add_handler(CommandHandler("stop_add_sticker", commands.stop_add_sticker))
+    app.add_handler(CommandHandler("subscribe", commands.subscribe))
+    app.add_handler(CommandHandler("unsubscribe", commands.unsubscribe))
+    app.add_handler(CommandHandler("inspire", commands.inspire))
 
-    app.add_handler(MessageHandler(filters.Sticker.ALL, add_sticker))
+    app.add_handler(MessageHandler(filters.Sticker.ALL, commands.add_sticker))
     app.add_handler(
         MessageHandler(
-            filters.Regex("[hH]elp") | filters.Regex("[hH]ilfe"), there_there
+            filters.Regex("[hH]elp") | filters.Regex("[hH]ilfe"), commands.there_there
         )
     )
-
+    app.add_handler(MessageHandler(filters.Regex(r"\?"), commands.answer_question))
     app.run_polling()
-
-
-async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(
-        f"Hi {update.effective_user.first_name}! My developer was too lazy to write down any help :)"
-    )
-
-
-async def there_there(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(f"There there *pats head*")
-    sticker = random.choice(
-        [
-            "CAACAgIAAxkBAAEYu_5jPf5WYDTn3Jc5hRqRw4HvtVTMGgACMQEAAlKJkSNy74zuyFRhcyoE",
-            "CAACAgIAAxkBAAEYvAABYz3-bjX-Po33KiqNVfMqZPNnxfQAAuwAA_cCyA805OGp51WLlyoE",
-        ]
-    )
-    await update.message.reply_sticker(sticker)
-
-
-async def start_add_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    data.adding_sticker = True
-    data.write()
-    await update.message.reply_text("Alright, send the stickers!")
-
-
-async def stop_add_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    data.adding_sticker = False
-    data.write()
-    await update.message.reply_text(
-        "Stopped adding stickers. You can start again via /add_sticker"
-    )
-
-
-async def add_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    if not data.adding_sticker:
-        await update.message.reply_text("🤨")
-        return
-
-    data.sticker_pool.add(update.message.sticker.file_id)
-    data.write()
-    await update.message.reply_text("Added sticker! You can stop via /stop_add_sticker")
-
-
-async def sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    id = random.choice(list(data.sticker_pool))
-    await update.message.reply_sticker(id)
-
-
-async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    data.subscribers.add(update.effective_chat.id)
-    data.write()
-    await update.message.reply_text(
-        "Added to subscribers of scheduled sticker spam. You can unsubscribe via /unsubscribe"
-    )
-
-
-async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    data.subscribers.remove(update.effective_chat.id)
-    data.write()
-    await update.message.reply_text(
-        "Removed from subscribers of scheduled sticker spam. Subscribe again via /subscribe"
-    )
-
-
-async def inspire(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    response = requests.get("https://inspirobot.me/api?generate=true")
-    if response.status_code != 200:
-        await update.message.reply_text("Something went wrong :(")
-        return
-    link = response.text
-    await update.message.reply_photo(link)
-
-
-def init_pickle() -> None:
-    try:
-        Data.read()
-    except FileNotFoundError:
-        Data.write(Data())
-
-
-async def run_regular_spam():
-    while True:
-        time.sleep(60 * 60)
-        data = Data.read()
-        bot = telegram.Bot(get_token())
-        async with bot:
-            for id in data.subscribers:
-                data = Data.read()
-                sticker_id = random.choice(list(data.sticker_pool))
-                await bot.send_sticker(id, sticker_id)
-
-
-def get_token():
-    return os.getenv("TOKEN")
 
 
 if "__main__" == __name__:
