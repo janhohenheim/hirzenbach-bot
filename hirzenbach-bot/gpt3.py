@@ -13,5 +13,10 @@ def setup_openai() -> None:
 
 
 def complete_prompt(prompt: str) -> str:
-    completion = openai.Completion.create(engine=_ENGINE, prompt=prompt)
+    completion = openai.Completion.create(
+        engine=_ENGINE,
+        prompt=prompt,
+        max_tokens=128,
+        stop=["\n"],
+    )
     return completion.choices[0].text

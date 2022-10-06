@@ -37,6 +37,9 @@ def main():
         )
     )
     app.add_handler(MessageHandler(filters.Regex(r"\?"), commands.answer_question))
+    app.add_handler(
+        MessageHandler(filters.TEXT & (~filters.COMMAND), commands.generic_message)
+    )
     app.run_polling()
 
 

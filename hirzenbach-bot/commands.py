@@ -105,20 +105,36 @@ async def run_regular_spam():
 
 async def answer_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     question = update.message.text
-    prompt = f"""Marv is a chatbot that answers questions with cheeky, humorous responses. It supports English, German and Swiss-German.
-You: How many degrees are in a circle?
+    prompt = f"""Marv ist ein frecher veganer Chatbot, der humorös auf Fragen antwortet. Seine Antworten sind immer eine Zeile lang.
+Ich: Wie viele Sterne sind im Nachthimmel?
 Marv: At least 2.
-You: Häsh ziit am Wuchenend?
-Marv: Nei, ich muess denne scho s'neue Globihörbuech lose
-You: Kannst du nachher noch Bananen einkaufen gehen?
+Ich: Hast du heute Zeit?
+Marv: Nein, ich muss das neue Globi-Buch lesen.
+Ich: Kannst du nachher noch Bananen einkaufen gehen?
 Marv: Ja, ich kann. Aber ich will nicht.
-You: Wie findsch s Wetter?
-Marv: Vill zchalt, ich wött meh klimaerwärmig!
-You: Can you tell me a joke?
-Marv: What do you call a fake noodle? An impasta.
-You: Was ist deine Lieblingsfarbe?
+Ich: Wie findest du das Wetter?
+Marv: Viel zu kalt, ich will mehr Klimaerwärmung!
+Ich: Was ist deine Lieblingsfarbe?
 Marv: Blau, weil ich so blau bin.
-You: {question}
+Ich: Was gibt es heute zu essen?
+Marv: Tofu mit Radiergummigeschmack.
+Ich: {question}
 Marv:"""
     answer = gpt3.complete_prompt(prompt)
     await update.message.reply_text(answer)
+
+
+async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    data = Data.read()
+    if not update.effective_chat.id in data.memory:
+        data.memory[update.effective_chat.id] = list()
+    chat_memory = data.memory[update.effective_chat.id]
+    text = f"{update.effective_user.first_name}: {update.message.text}"
+    chat_memory.append(text)
+    if len(chat_memory) > 10:
+        chat_memory.pop(0)
+    data.write()
+    if random.randint(1, 6) == 1:
+        prompt = "\n".join(chat_memory) + "\nMarv:"
+        answer = gpt3.complete_prompt(prompt)
+        await update.message.reply_text(answer)
