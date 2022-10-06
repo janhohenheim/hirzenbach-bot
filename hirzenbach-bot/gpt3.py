@@ -3,7 +3,7 @@ import openai
 import os
 from env import Env
 
-_ENGINE = "text-ada-001"
+_ENGINE = "text-curie-001"
 
 
 def setup_openai() -> None:
