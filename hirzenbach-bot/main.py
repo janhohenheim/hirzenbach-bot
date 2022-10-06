@@ -37,7 +37,9 @@ class Data:
 
 
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(f"Hello {update.effective_user.first_name}")
+    await update.message.reply_text(
+        f"Hi {update.effective_user.first_name}! My developer was too lazy to write down any help :)"
+    )
 
 
 async def there_there(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -62,7 +64,9 @@ async def stop_add_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     data = Data.read()
     data.adding_sticker = False
     data.write()
-    await update.message.reply_text("Stopped adding stickers")
+    await update.message.reply_text(
+        "Stopped adding stickers. You can start again via /add_sticker"
+    )
 
 
 async def add_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -86,14 +90,18 @@ async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     data = Data.read()
     data.subscribers.add(update.effective_chat.id)
     data.write()
-    await update.message.reply_text("Added to subscribers")
+    await update.message.reply_text(
+        "Added to subscribers. You can unsubscribe via /unsubscribe"
+    )
 
 
 async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     data = Data.read()
-    data.subscribers.remove(update.effective_user.id)
+    data.subscribers.remove(update.effective_chat.id)
     data.write()
-    await update.message.reply_text("Removed from subscribers")
+    await update.message.reply_text(
+        "Removed from subscribers. Subscribe again via /subscribe"
+    )
 
 
 async def inspire(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -122,10 +130,6 @@ async def run_regular_spam():
             for id in data.subscribers:
                 data = Data.read()
                 sticker_id = random.choice(list(data.sticker_pool))
-                await bot.send_message(
-                    id,
-                    "Time for your scheduled sticker spam! (you can stop this with /unsubscribe)",
-                )
                 await bot.send_sticker(id, sticker_id)
 
 
