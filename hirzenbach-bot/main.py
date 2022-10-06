@@ -36,6 +36,32 @@ class Data:
             pickle.dump(self, f)
 
 
+def main():
+    load_dotenv()
+    init_pickle()
+    thread = Thread(target=asyncio.run, args=(run_regular_spam(),))
+    thread.start()
+
+    app = ApplicationBuilder().token(get_token()).build()
+
+    app.add_handler(CommandHandler("sticker", sticker))
+    app.add_handler(CommandHandler("add_sticker", start_add_sticker))
+    app.add_handler(CommandHandler("help", help))
+    app.add_handler(CommandHandler("stop_add_sticker", stop_add_sticker))
+    app.add_handler(CommandHandler("subscribe", subscribe))
+    app.add_handler(CommandHandler("unsubscribe", unsubscribe))
+    app.add_handler(CommandHandler("inspire", inspire))
+
+    app.add_handler(MessageHandler(filters.Sticker.ALL, add_sticker))
+    app.add_handler(
+        MessageHandler(
+            filters.Regex("[hH]elp") | filters.Regex("[hH]ilfe"), there_there
+        )
+    )
+
+    app.run_polling()
+
+
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
         f"Hi {update.effective_user.first_name}! My developer was too lazy to write down any help :)"
@@ -91,7 +117,7 @@ async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     data.subscribers.add(update.effective_chat.id)
     data.write()
     await update.message.reply_text(
-        "Added to subscribers. You can unsubscribe via /unsubscribe"
+        "Added to subscribers of scheduled sticker spam. You can unsubscribe via /unsubscribe"
     )
 
 
@@ -100,13 +126,12 @@ async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     data.subscribers.remove(update.effective_chat.id)
     data.write()
     await update.message.reply_text(
-        "Removed from subscribers. Subscribe again via /subscribe"
+        "Removed from subscribers of scheduled sticker spam. Subscribe again via /subscribe"
     )
 
 
 async def inspire(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     response = requests.get("https://inspirobot.me/api?generate=true")
-    # check return code
     if response.status_code != 200:
         await update.message.reply_text("Something went wrong :(")
         return
@@ -138,26 +163,4 @@ def get_token():
 
 
 if "__main__" == __name__:
-    load_dotenv()
-    init_pickle()
-    thread = Thread(target=asyncio.run, args=(run_regular_spam(),))
-    thread.start()
-
-    app = ApplicationBuilder().token(get_token()).build()
-
-    app.add_handler(CommandHandler("sticker", sticker))
-    app.add_handler(CommandHandler("add_sticker", start_add_sticker))
-    app.add_handler(CommandHandler("help", help))
-    app.add_handler(CommandHandler("stop_add_sticker", stop_add_sticker))
-    app.add_handler(CommandHandler("subscribe", subscribe))
-    app.add_handler(CommandHandler("unsubscribe", unsubscribe))
-    app.add_handler(CommandHandler("inspire", inspire))
-
-    app.add_handler(MessageHandler(filters.Sticker.ALL, add_sticker))
-    app.add_handler(
-        MessageHandler(
-            filters.Regex("[hH]elp") | filters.Regex("[hH]ilfe"), there_there
-        )
-    )
-
-    app.run_polling()
+    main()
