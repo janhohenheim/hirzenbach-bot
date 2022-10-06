@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from typing import Set
+from typing import List
 import telegram
 from telegram import Update
 from telegram.ext import (
@@ -105,22 +105,23 @@ async def run_regular_spam():
 
 async def answer_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     question = update.message.text
-    prompt = f"""Marv ist ein frecher veganer Chatbot, der humorös auf Fragen antwortet. Seine Antworten sind immer eine Zeile lang.
+    prompt = f"""Kim ist ein frecher veganer Chatbot, der humorös auf Fragen antwortet. Seine Antworten sind immer eine Zeile lang.
 Ich: Wie viele Sterne sind im Nachthimmel?
-Marv: At least 2.
+Kim: At least 2.
 Ich: Hast du heute Zeit?
-Marv: Nein, ich muss das neue Globi-Buch lesen.
+Kim: Nein, ich muss das neue Globi-Buch lesen.
 Ich: Kannst du nachher noch Bananen einkaufen gehen?
-Marv: Ja, ich kann. Aber ich will nicht.
+Kim: Ja, ich kann. Aber ich will nicht.
 Ich: Wie findest du das Wetter?
-Marv: Viel zu kalt, ich will mehr Klimaerwärmung!
+Kim: Viel zu kalt, ich will mehr Klimaerwärmung!
 Ich: Was ist deine Lieblingsfarbe?
-Marv: Blau, weil ich so blau bin.
+Kim: Blau, weil ich so blau bin.
 Ich: Was gibt es heute zu essen?
-Marv: Tofu mit Radiergummigeschmack.
+Kim: Tofu mit Radiergummigeschmack.
 Ich: {question}
-Marv:"""
+Kim:"""
     answer = gpt3.complete_prompt(prompt)
+    _append_to_memory(update.effective_chat.id, "Kim", answer)
     await update.message.reply_text(answer)
 
 
@@ -128,13 +129,24 @@ async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     data = Data.read()
     if not update.effective_chat.id in data.memory:
         data.memory[update.effective_chat.id] = list()
-    chat_memory = data.memory[update.effective_chat.id]
-    text = f"{update.effective_user.first_name}: {update.message.text}"
+    chat_memory = _append_to_memory(
+        update.effective_chat.id, update.effective_user.first_name, update.message.text
+    )
+    if random.randint(1, 8) == 1:
+        prompt = "\n".join(chat_memory) + "\nKim:"
+        answer = gpt3.complete_prompt(prompt)
+        _append_to_memory(update.effective_chat.id, "Kim", answer)
+        await update.message.reply_text(answer)
+
+
+def _append_to_memory(chat: int, user: str, text: str) -> List[str]:
+    data = Data.read()
+    if not chat in data.memory:
+        data.memory[chat] = list()
+    chat_memory = data.memory[chat]
+    text = f"{user}: {text}"
     chat_memory.append(text)
-    if len(chat_memory) > 10:
+    while len(chat_memory) > 10:
         chat_memory.pop(0)
     data.write()
-    if random.randint(1, 6) == 1:
-        prompt = "\n".join(chat_memory) + "\nMarv:"
-        answer = gpt3.complete_prompt(prompt)
-        await update.message.reply_text(answer)
+    return chat_memory

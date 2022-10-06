@@ -19,4 +19,4 @@ def complete_prompt(prompt: str) -> str:
         max_tokens=128,
         stop=["\n"],
     )
-    return completion.choices[0].text
+    return completion.choices[0].text.strip()
