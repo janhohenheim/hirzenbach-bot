@@ -50,7 +50,6 @@ async def stop_add_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 async def add_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     data = Data.read()
     if not data.adding_sticker:
-        await update.message.reply_text("🤨")
         return
 
     data.sticker_pool.add(update.message.sticker.file_id)
