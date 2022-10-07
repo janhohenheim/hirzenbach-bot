@@ -2,6 +2,7 @@
 
 import asyncio
 from sched import scheduler
+from typing import Callable
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -16,11 +17,19 @@ import commands
 import scheduled
 
 
+def _get_spam_thread(callback: Callable) -> Thread:
+    return Thread(target=asyncio.run, args=(callback(),))
+
+
 def main():
     Data.init()
     gpt3.setup_openai()
-    thread = Thread(target=asyncio.run, args=(scheduled.run_regular_spam(),))
-    thread.start()
+    threads = [
+        _get_spam_thread(callback)
+        for callback in [scheduled.run_morning_spam, scheduled.run_regular_spam]
+    ]
+    for thread in threads:
+        thread.start()
 
     app = ApplicationBuilder().token(Env.read().telegram_token).build()
 
