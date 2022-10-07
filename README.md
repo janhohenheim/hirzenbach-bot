@@ -1,1 +1,0 @@
-# hirzenbach-bot
