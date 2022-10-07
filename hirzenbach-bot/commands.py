@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 
 from typing import List
-import telegram
 from telegram import Update
 from telegram.ext import (
     ContextTypes,
 )
 import random
-import time
+import gpt3
 import requests
 from persistance import Data
-from env import Env
-import gpt3
 
 
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -88,18 +85,6 @@ async def inspire(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
     link = response.text
     await update.message.reply_photo(link)
-
-
-async def run_regular_spam():
-    while True:
-        time.sleep(60 * 60)
-        data = Data.read()
-        bot = telegram.Bot(Env.read().telegram_token)
-        async with bot:
-            for id in data.subscribers:
-                data = Data.read()
-                sticker_id = random.choice(list(data.sticker_pool))
-                await bot.send_sticker(id, sticker_id)
 
 
 async def answer_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

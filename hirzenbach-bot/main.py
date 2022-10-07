@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import asyncio
+from sched import scheduler
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -12,12 +13,13 @@ import gpt3
 from env import Env
 from persistance import Data
 import commands
+import scheduled
 
 
 def main():
     Data.init()
     gpt3.setup_openai()
-    thread = Thread(target=asyncio.run, args=(commands.run_regular_spam(),))
+    thread = Thread(target=asyncio.run, args=(scheduled.run_regular_spam(),))
     thread.start()
 
     app = ApplicationBuilder().token(Env.read().telegram_token).build()
