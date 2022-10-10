@@ -6,6 +6,7 @@ import random
 from datetime import timezone, datetime, timedelta
 from gpt3 import complete_prompt
 
+
 async def run_regular_spam():
     while True:
         time.sleep(60 * 60)
@@ -27,13 +28,15 @@ async def run_morning_spam():
             continue
         data = Data.read()
         bot = build_telegram_bot()
-        greeting = complete_prompt("""The following messages were rated UK's most heartwarming and inspiring "good morning" greetings people received from friends.
+        greeting = complete_prompt(
+            """The following messages were rated UK's most heartwarming and inspiring "good morning" greetings people received from friends.
 - Good morning, sunshine! I hope you have a great day.
 - Sun is rising and so are you. Good morning!
 - Hi! The world is waking up and cannot wait to see you shine today.
 - Morning, sleepyhead :) Take some time today to do at least one thing you love.
 - Good morning! Try to smile today. It makes you look beautiful!
--""")
+-"""
+        )
         async with bot:
             for id in data.subscribers:
                 await bot.send_message(id, greeting)
@@ -58,4 +61,4 @@ def is_day() -> bool:
 
 def is_morning() -> bool:
     now = get_time()
-    return now.hour == 8
+    return now.hour == 7
