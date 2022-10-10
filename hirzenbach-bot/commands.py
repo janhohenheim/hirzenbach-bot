@@ -120,7 +120,7 @@ async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     is_reply_to_me = (
         update.effective_message.reply_to_message.from_user.username == context.bot.id
     )
-    if random.randint(1, 6) == 1 or is_reply:
+    if random.randint(1, 6) == 1 or is_reply_to_me:
         prompt = "\n".join(chat_memory) + "\nKim:"
         answer = gpt3.complete_prompt(prompt)
         _append_to_memory(update.effective_chat.id, "Kim", answer)
