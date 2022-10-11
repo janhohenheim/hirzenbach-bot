@@ -112,7 +112,7 @@ async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                 message.replace(context.bot.name, f"@{BOT_NAME}")
                 for message in chat_memory
             )
-            + f"\{BOT_NAME}:"
+            + f"\n{BOT_NAME}:"
         )
         answer = gpt3.complete_prompt(prompt)
         _append_to_memory(update.effective_chat.id, BOT_NAME, answer)
