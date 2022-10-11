@@ -73,12 +73,32 @@ async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
+async def subscribe_morning(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    data = Data.read()
+    data.morning_subscribers.add(update.effective_chat.id)
+    data.write()
+    await update.message.reply_text(
+        "Added to subscribers of scheduled good morning messages. You can unsubscribe via /unsubscribe_morning"
+    )
+
+
 async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     data = Data.read()
     data.subscribers.remove(update.effective_chat.id)
     data.write()
     await update.message.reply_text(
         "Removed from subscribers of scheduled sticker spam. Subscribe again via /subscribe"
+    )
+
+
+async def unsubscribe_morning(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
+    data = Data.read()
+    data.morning_subscribers.remove(update.effective_chat.id)
+    data.write()
+    await update.message.reply_text(
+        "Removed from subscribers of scheduled good morning messages. Subscribe again via /subscribe_morning"
     )
 
 

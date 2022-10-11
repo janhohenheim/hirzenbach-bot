@@ -38,7 +38,7 @@ async def run_morning_spam():
 -"""
         )
         async with bot:
-            for id in data.subscribers:
+            for id in data.morning_subscribers:
                 await bot.send_message(id, greeting)
 
 

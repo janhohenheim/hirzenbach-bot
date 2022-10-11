@@ -8,6 +8,7 @@ class Data:
     sticker_pool: Set[str] = field(default_factory=set)
     adding_sticker: bool = False
     subscribers: Set[int] = field(default_factory=set)
+    morning_subscribers: Set[int] = field(default_factory=set)
     memory: Dict[int, List[str]] = field(default_factory=dict)
 
     def init() -> None:
@@ -22,6 +23,7 @@ class Data:
             _ensure_attr(data, "sticker_pool", set())
             _ensure_attr(data, "adding_sticker", False)
             _ensure_attr(data, "subscribers", set())
+            _ensure_attr(data, "morning_subscribers", set())
             _ensure_attr(data, "memory", dict())
             return data
 
