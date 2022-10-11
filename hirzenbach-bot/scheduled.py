@@ -1,7 +1,7 @@
 from env import Env
 import time
 import telegram
-from persistance import Data
+from persistence import Data
 import random
 from datetime import timezone, datetime, timedelta
 from gpt3 import complete_prompt

@@ -8,7 +8,7 @@ from telegram.ext import (
 import random
 import gpt3
 import requests
-from persistance import Data
+from persistence import Data
 
 # Arbitrary, but it seems a gender neutral name gives less mechanical responses
 # than the real name or a typical bot name like "Marv"
