@@ -92,6 +92,9 @@ async def inspire(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.message is None:
+        return
+
     data = Data.read()
     if not update.effective_chat.id in data.memory:
         data.memory[update.effective_chat.id] = list()
