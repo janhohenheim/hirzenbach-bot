@@ -37,9 +37,9 @@ def main():
     app.add_handler(CommandHandler("add_sticker", commands.start_add_sticker))
     app.add_handler(CommandHandler("help", commands.help))
     app.add_handler(CommandHandler("stop_add_sticker", commands.stop_add_sticker))
-    app.add_handler(CommandHandler("subscribe_sticker", commands.subscribe))
+    app.add_handler(CommandHandler("subscribe_sticker", commands.subscribe_sticker))
     app.add_handler(CommandHandler("subscribe_morning", commands.subscribe_morning))
-    app.add_handler(CommandHandler("unsubscribe_sticker", commands.unsubscribe))
+    app.add_handler(CommandHandler("unsubscribe_sticker", commands.unsubscribe_sticker))
     app.add_handler(CommandHandler("unsubscribe_morning", commands.unsubscribe_morning))
     app.add_handler(CommandHandler("inspire", commands.inspire))
 
