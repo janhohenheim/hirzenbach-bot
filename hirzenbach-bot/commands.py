@@ -117,7 +117,6 @@ async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         )
         answer = gpt3.complete_prompt(prompt)
         _append_to_memory(update.effective_chat.id, BOT_NAME, answer)
-        # send only if answer is not empty
         if answer is not None and answer != "":
             await update.message.reply_text(answer)
 
