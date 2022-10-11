@@ -64,12 +64,12 @@ async def sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_sticker(id)
 
 
-async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def subscribe_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     data = Data.read()
     data.sticker_subscribers.add(update.effective_chat.id)
     data.write()
     await update.message.reply_text(
-        "Added to subscribers of scheduled sticker spam. You can unsubscribe via /unsubscribe"
+        "Added to subscribers of scheduled sticker spam. You can unsubscribe via /unsubscribe_sticker"
     )
 
 
@@ -82,12 +82,12 @@ async def subscribe_morning(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     )
 
 
-async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def unsubscribe_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     data = Data.read()
     data.sticker_subscribers.remove(update.effective_chat.id)
     data.write()
     await update.message.reply_text(
-        "Removed from subscribers of scheduled sticker spam. Subscribe again via /subscribe"
+        "Removed from subscribers of scheduled sticker spam. Subscribe again via /subscribe_sticker"
     )
 
 
