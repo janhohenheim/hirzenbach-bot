@@ -92,20 +92,17 @@ async def inspire(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if update.message is None:
-        return
-
     data = Data.read()
     if not update.effective_chat.id in data.memory:
         data.memory[update.effective_chat.id] = list()
     chat_memory = _append_to_memory(
-        update.effective_chat.id, update.effective_user.first_name, update.message.text
+        update.effective_chat.id,
+        update.effective_user.first_name,
+        update.effective_message.text,
     )
     reply_to_message = update.message.reply_to_message
     is_reply_to_me = (
-        reply_to_message is not None
-        and reply_to_message.from_user.is_bot
-        and reply_to_message.from_user.get_bot().id == context.bot.id
+        reply_to_message is not None and reply_to_message.from_user.id == context.bot.id
     )
     is_addressing_me = context.bot.name in update.message.text
 
