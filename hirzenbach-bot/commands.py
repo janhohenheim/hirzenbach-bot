@@ -116,15 +116,17 @@ async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     chat_memory = _append_to_memory(
         update.effective_chat.id, update.effective_user.first_name, update.message.text
     )
-    is_reply = update.effective_message.reply_to_message is not None
+    reply_to_message = update.message.reply_to_message
     is_reply_to_me = (
-        update.effective_message.reply_to_message.from_user.username == context.bot.id
+        reply_to_message is not None and reply_to_message.from_user.id == context.bot.id
     )
     if random.randint(1, 6) == 1 or is_reply_to_me:
         prompt = "\n".join(chat_memory) + "\nKim:"
         answer = gpt3.complete_prompt(prompt)
         _append_to_memory(update.effective_chat.id, "Kim", answer)
-        await update.message.reply_text(answer)
+        # send only if answer is not empty
+        if answer is not None and answer != "":
+            await update.message.reply_text(answer)
 
 
 def _append_to_memory(chat: int, user: str, text: str) -> List[str]:
