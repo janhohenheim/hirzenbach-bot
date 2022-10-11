@@ -103,8 +103,7 @@ async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
     reply_to_message = update.effective_message.reply_to_message
     is_reply_to_me = (
-        reply_to_message is not None
-        and reply_to_message.from_user.name == context.bot.name
+        reply_to_message is not None and reply_to_message.from_user.id == context.bot.id
     )
     is_addressing_me = context.bot.name in update.message.text
 
