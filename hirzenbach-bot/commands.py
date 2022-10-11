@@ -82,7 +82,9 @@ async def subscribe_morning(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     )
 
 
-async def unsubscribe_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def unsubscribe_sticker(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     data = Data.read()
     data.sticker_subscribers.remove(update.effective_chat.id)
     data.write()
@@ -125,7 +127,7 @@ async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     is_reply_to_me = (
         reply_to_message is not None and reply_to_message.from_user.id == context.bot.id
     )
-    is_addressing_me = context.bot.name in update.message.text
+    is_addressing_me = context.bot.name in update.effective_message.text
 
     if random.randint(1, 6) == 1 or is_reply_to_me or is_addressing_me:
         prompt = (
