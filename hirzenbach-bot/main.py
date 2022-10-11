@@ -12,7 +12,7 @@ from telegram.ext import (
 from threading import Thread
 import gpt3
 from env import Env
-from persistence import Data
+from persistance import Data
 import commands
 import scheduled
 

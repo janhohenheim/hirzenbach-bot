@@ -8,7 +8,7 @@ from telegram.ext import (
 import random
 import gpt3
 import requests
-from persistence import Data
+from persistance import Data
 
 # Arbitrary, but it seems a gender neutral name gives less mechanical responses
 # than the real name or a typical bot name like "Marv"
@@ -66,7 +66,7 @@ async def sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     data = Data.read()
-    data.subscribers.add(update.effective_chat.id)
+    data.sticker_subscribers.add(update.effective_chat.id)
     data.write()
     await update.message.reply_text(
         "Added to subscribers of scheduled sticker spam. You can unsubscribe via /unsubscribe"
@@ -84,7 +84,7 @@ async def subscribe_morning(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
 async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     data = Data.read()
-    data.subscribers.remove(update.effective_chat.id)
+    data.sticker_subscribers.remove(update.effective_chat.id)
     data.write()
     await update.message.reply_text(
         "Removed from subscribers of scheduled sticker spam. Subscribe again via /subscribe"
