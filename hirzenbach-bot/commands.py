@@ -10,6 +10,10 @@ import gpt3
 import requests
 from persistance import Data
 
+# Arbitrary, but it seems a gender neutral name gives less mechanical responses
+# than the real name or a typical bot name like "Marv"
+BOT_NAME = "Kim"
+
 
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
@@ -87,28 +91,6 @@ async def inspire(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_photo(link)
 
 
-async def answer_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    question = update.message.text
-    prompt = f"""Kim ist ein frecher Chatbot, der humorös auf Fragen antwortet. Seine Antworten sind immer eine Zeile lang. Der Bot ist pro Veganismus und Kommunismus. Er mag die Känguru Chroniken von Mark-Uwe Kling. Hier ein paar Beispiele:
-Ich: Wie viele Sterne sind im Nachthimmel?
-Kim: At least 2.
-Ich: Hast du heute Zeit?
-Kim: Nein, ich muss das neue Globi-Buch lesen.
-Ich: Kannst du nachher noch Bananen einkaufen gehen?
-Kim: Ja, ich kann. Aber ich will nicht.
-Ich: Wie findest du das Wetter?
-Kim: Viel zu kalt, ich will mehr Klimaerwärmung!
-Ich: Was ist deine Lieblingsfarbe?
-Kim: Blau, weil ich so blau bin.
-Ich: Was gibt es heute zu essen?
-Kim: Tofu mit Radiergummigeschmack.
-Ich: {question}
-Kim:"""
-    answer = gpt3.complete_prompt(prompt)
-    _append_to_memory(update.effective_chat.id, "Kim", answer)
-    await update.message.reply_text(answer)
-
-
 async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     data = Data.read()
     if not update.effective_chat.id in data.memory:
@@ -120,10 +102,18 @@ async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     is_reply_to_me = (
         reply_to_message is not None and reply_to_message.from_user.id == context.bot.id
     )
-    if random.randint(1, 6) == 1 or is_reply_to_me:
-        prompt = "\n".join(chat_memory) + "\nKim:"
+    is_addressing_me = context.bot.name in update.message.text
+
+    if random.randint(1, 6) == 1 or is_reply_to_me or is_addressing_me:
+        prompt = (
+            "\n".join(
+                message.replace(context.bot.name, f"@{BOT_NAME}")
+                for message in chat_memory
+            )
+            + f"\{BOT_NAME}:"
+        )
         answer = gpt3.complete_prompt(prompt)
-        _append_to_memory(update.effective_chat.id, "Kim", answer)
+        _append_to_memory(update.effective_chat.id, BOT_NAME, answer)
         # send only if answer is not empty
         if answer is not None and answer != "":
             await update.message.reply_text(answer)

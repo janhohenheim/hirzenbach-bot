@@ -47,7 +47,6 @@ def main():
             filters.Regex("[hH]elp") | filters.Regex("[hH]ilfe"), commands.there_there
         )
     )
-    app.add_handler(MessageHandler(filters.Regex(r"\?"), commands.answer_question))
     app.add_handler(
         MessageHandler(filters.TEXT & (~filters.COMMAND), commands.generic_message)
     )
