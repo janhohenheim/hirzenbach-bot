@@ -144,7 +144,12 @@ async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 
 async def code(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    coding_request = update.effective_message.text.replace("/code ", "")
+    coding_request = update.effective_message.text.replace("/code ", "").strip()
+    if coding_request == "":
+        await update.message.reply_markdown(
+            "Please specify a coding request, e.g. `/code a single function implementing fizzbuzz`"
+        )
+        return
     prompt = f'"""\nPython 3\n{coding_request}.\nThe code is implemented using modern, clean, functional programming.\nIt is readable and concise. There are not too many imports or functions.\n"""'
     answer = gpt3.complete_code_prompt(prompt)
     if answer is not None and answer != "":
