@@ -145,9 +145,10 @@ async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 async def code(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     coding_request = update.effective_message.text.replace("/code ", "")
-    prompt = f"# Python 3\n# {coding_request}"
+    prompt = f'"""\nPython 3\n{coding_request}\n"""'
     answer = gpt3.complete_prompt(prompt)
-    await update.message.reply_text(answer)
+    if answer is not None and answer != "":
+        await update.message.reply_text(answer)
 
 
 def _append_to_memory(chat: int, user: str, text: str) -> List[str]:
