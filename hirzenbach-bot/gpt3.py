@@ -27,6 +27,7 @@ def complete_code_prompt(prompt: str) -> str:
         engine=_CODE_ENGINE,
         prompt=prompt,
         max_tokens=512,
+        stop=["\n\n\n"],
     )
     return _get_first_nonempty_completion(completion)
 
