@@ -1,11 +1,10 @@
-import imp
 import openai
-import os
 from env import Env
 
 _ENGINE = "text-curie-001"
 # OpenAI Codex is free during private beta; let's use the best model
-_CODE_ENGINE = "code-davin-002"
+_CODE_ENGINE = "code-davinci-002"
+
 
 def setup_openai() -> None:
     env = Env.read()
@@ -20,7 +19,7 @@ def complete_prompt(prompt: str) -> str:
         max_tokens=128,
         stop=["\n"],
     )
-    return completion.choices[0].text.strip()
+    return _get_first_nonempty_completion(completion)
 
 
 def complete_code_prompt(prompt: str) -> str:
@@ -29,4 +28,12 @@ def complete_code_prompt(prompt: str) -> str:
         prompt=prompt,
         max_tokens=2048,
     )
-    return completion.choices[0].text.strip()
+    return _get_first_nonempty_completion(completion)
+
+
+def _get_first_nonempty_completion(completion: openai.Completion) -> str:
+    for choice in completion.choices:
+        text = choice.text.strip()
+        if text != "":
+            return text
+    return ""
