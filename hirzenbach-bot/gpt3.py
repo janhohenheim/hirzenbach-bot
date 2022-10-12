@@ -26,7 +26,7 @@ def complete_code_prompt(prompt: str) -> str:
     completion = openai.Completion.create(
         engine=_CODE_ENGINE,
         prompt=prompt,
-        max_tokens=2048,
+        max_tokens=1024,
         temperature=0,
         top_p=1,
         frequency_penalty=0,
