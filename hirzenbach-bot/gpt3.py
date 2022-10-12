@@ -3,7 +3,7 @@ from env import Env
 
 _ENGINE = "text-curie-001"
 # OpenAI Codex is free during private beta; let's use the best model
-_CODE_ENGINE = "code-cushman-001"
+_CODE_ENGINE = "code-davinci-002"
 
 
 def setup_openai() -> None:
