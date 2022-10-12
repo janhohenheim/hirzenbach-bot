@@ -149,7 +149,7 @@ async def code(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     answer = gpt3.complete_code_prompt(prompt)
     if answer is not None and answer != "":
         formatted_code = f"```\n{answer}\n```"
-        await update.message.reply_markdown(answer)
+        await update.message.reply_markdown(formatted_code)
 
 
 def _append_to_memory(chat: int, user: str, text: str) -> List[str]:
