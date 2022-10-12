@@ -42,6 +42,7 @@ def main():
     app.add_handler(CommandHandler("unsubscribe_sticker", commands.unsubscribe_sticker))
     app.add_handler(CommandHandler("unsubscribe_morning", commands.unsubscribe_morning))
     app.add_handler(CommandHandler("inspire", commands.inspire))
+    app.add_handler(CommandHandler("code", commands.code))
 
     app.add_handler(MessageHandler(filters.Sticker.ALL, commands.add_sticker))
     app.add_handler(
