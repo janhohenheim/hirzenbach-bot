@@ -1,8 +1,7 @@
 from env import Env
 import time
 import telegram
-from persistance import Data
-import persistance
+from persistance import get_sticker_subscribers, get_morning_subscribers, get_stickers
 import random
 from datetime import timezone, datetime, timedelta
 from gpt3 import complete_prompt
@@ -13,11 +12,10 @@ async def run_regular_spam():
         time.sleep(60 * 60)
         if not is_day():
             continue
-        data = Data.read()
         bot = build_telegram_bot()
         async with bot:
-            stickers = persistance.get_stickers()
-            for id in data.sticker_subscribers:
+            stickers = get_stickers()
+            for id in get_sticker_subscribers():
                 sticker_id = random.choice(stickers)
                 await bot.send_sticker(id, sticker_id)
 
@@ -27,7 +25,6 @@ async def run_morning_spam():
         time.sleep(60 * 60)
         if not is_morning():
             continue
-        data = Data.read()
         bot = build_telegram_bot()
         greeting = complete_prompt(
             """The following messages were rated UK's most heartwarming and inspiring "good morning" greetings people received from friends.
@@ -39,7 +36,7 @@ async def run_morning_spam():
 -"""
         )
         async with bot:
-            for id in data.morning_subscribers:
+            for id in get_morning_subscribers():
                 await bot.send_message(id, greeting)
 
 

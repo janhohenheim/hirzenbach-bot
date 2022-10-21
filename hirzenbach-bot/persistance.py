@@ -7,12 +7,16 @@ _SQLITE_DATABASE = 'hirzenbach_bot.sqlite3'
 _SQLITE_SCHEMA = """
 CREATE TABLE IF NOT EXISTS stickers
     (file_id TEXT PRIMARY KEY ON CONFLICT REPLACE);
+CREATE TABLE IF NOT EXISTS sticker_subscribers
+    (chat_id INTEGER PRIMARY KEY ON CONFLICT REPLACE);
+CREATE TABLE IF NOT EXISTS morning_subscribers
+    (chat_id INTEGER PRIMARY KEY ON CONFLICT REPLACE);
 """
 
 
 def init_database() -> None:
     connection = _connect()
-    connection.execute(_SQLITE_SCHEMA)
+    connection.executescript(_SQLITE_SCHEMA)
 
 
 def migrate_stickers_to_sqlite():
@@ -22,14 +26,58 @@ def migrate_stickers_to_sqlite():
             add_sticker(sticker)
 
 
+def migrate_sticker_subscribers_to_sqlite():
+    if len(get_sticker_subscribers()) == 0:
+        data = Data.read()
+        for chat_id in data.sticker_subscribers:
+            subscribe_stickers(chat_id)
+
+
+def migrate_morning_subscribers_to_sqlite():
+    if len(get_morning_subscribers()) == 0:
+        data = Data.read()
+        for chat_id in data.morning_subscribers:
+            subscribe_morning(chat_id)
+
+
 def get_stickers() -> List[str]:
     with _connect() as connection:
-        return [sticker_id for (sticker_id, *_) in connection.execute("SELECT file_id FROM stickers").fetchall()]
+        return [sticker_id for (sticker_id,) in connection.execute("SELECT file_id FROM stickers").fetchall()]
 
 
 def add_sticker(sticker_id: str) -> None:
     with _connect() as connection:
         connection.execute("INSERT INTO stickers (file_id) VALUES (?)", (sticker_id,))
+
+
+def subscribe_stickers(chat_id: int) -> None:
+    with _connect() as connection:
+        connection.execute("INSERT INTO sticker_subscribers (chat_id) VALUES (?)", (chat_id,))
+
+
+def unsubscribe_stickers(chat_id: int) -> None:
+    with _connect() as connection:
+        connection.execute("DELETE FROM sticker_subscribers WHERE chat_id = ?", (chat_id,))
+
+
+def get_sticker_subscribers() -> List[int]:
+    with _connect() as connection:
+        return [chat_id for (chat_id,) in connection.execute("SELECT chat_id FROM sticker_subscribers").fetchall()]
+
+
+def subscribe_morning(chat_id: int) -> None:
+    with _connect() as connection:
+        connection.execute("INSERT INTO morning_subscribers (chat_id) VALUES (?)", (chat_id,))
+
+
+def unsubscribe_morning(chat_id: int) -> None:
+    with _connect() as connection:
+        connection.execute("DELETE FROM morning_subscribers WHERE chat_id = ?", (chat_id,))
+
+
+def get_morning_subscribers() -> List[int]:
+    with _connect() as connection:
+        return [chat_id for (chat_id,) in connection.execute("SELECT chat_id FROM morning_subscribers").fetchall()]
 
 
 def _connect() -> sqlite3.Connection:

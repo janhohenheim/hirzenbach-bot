@@ -64,18 +64,14 @@ async def sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def subscribe_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    data.sticker_subscribers.add(update.effective_chat.id)
-    data.write()
+    persistance.subscribe_stickers(update.effective_chat.id)
     await update.message.reply_text(
         "Added to subscribers of scheduled sticker spam. You can unsubscribe via /unsubscribe_sticker"
     )
 
 
 async def subscribe_morning(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    data.morning_subscribers.add(update.effective_chat.id)
-    data.write()
+    persistance.subscribe_morning(update.effective_chat.id)
     await update.message.reply_text(
         "Added to subscribers of scheduled good morning messages. You can unsubscribe via /unsubscribe_morning"
     )
@@ -84,9 +80,7 @@ async def subscribe_morning(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 async def unsubscribe_sticker(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
-    data = Data.read()
-    data.sticker_subscribers.remove(update.effective_chat.id)
-    data.write()
+    persistance.unsubscribe_stickers(update.effective_chat.id)
     await update.message.reply_text(
         "Removed from subscribers of scheduled sticker spam. Subscribe again via /subscribe_sticker"
     )
@@ -95,9 +89,7 @@ async def unsubscribe_sticker(
 async def unsubscribe_morning(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
-    data = Data.read()
-    data.morning_subscribers.remove(update.effective_chat.id)
-    data.write()
+    persistance.unsubscribe_morning(update.effective_chat.id)
     await update.message.reply_text(
         "Removed from subscribers of scheduled good morning messages. Subscribe again via /subscribe_morning"
     )

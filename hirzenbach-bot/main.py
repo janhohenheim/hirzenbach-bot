@@ -12,7 +12,7 @@ from telegram.ext import (
 from threading import Thread
 import gpt3
 from env import Env
-from persistance import Data, init_database, migrate_stickers_to_sqlite
+from persistance import Data, init_database, migrate_stickers_to_sqlite, migrate_morning_subscribers_to_sqlite
 import commands
 import scheduled
 
@@ -25,6 +25,8 @@ def main():
     Data.init()
     init_database()
     migrate_stickers_to_sqlite()
+    migrate_stickers_to_sqlite()
+    migrate_morning_subscribers_to_sqlite()
     gpt3.setup_openai()
     threads = [
         _get_spam_thread(callback)
