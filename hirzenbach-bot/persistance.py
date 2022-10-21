@@ -1,4 +1,4 @@
-from typing import Set, Dict, List
+from typing import Set, Dict, List, Optional
 from dataclasses import dataclass, field
 import pickle
 import sqlite3
@@ -6,11 +6,15 @@ import sqlite3
 _SQLITE_DATABASE = 'hirzenbach_bot.sqlite3'
 _SQLITE_SCHEMA = """
 CREATE TABLE IF NOT EXISTS stickers
-    (file_id TEXT PRIMARY KEY ON CONFLICT REPLACE);
+    ( file_id TEXT PRIMARY KEY ON CONFLICT REPLACE);
 CREATE TABLE IF NOT EXISTS sticker_subscribers
-    (chat_id INTEGER PRIMARY KEY ON CONFLICT REPLACE);
+    ( chat_id INTEGER PRIMARY KEY ON CONFLICT REPLACE);
 CREATE TABLE IF NOT EXISTS morning_subscribers
-    (chat_id INTEGER PRIMARY KEY ON CONFLICT REPLACE);
+    ( chat_id INTEGER PRIMARY KEY ON CONFLICT REPLACE);
+CREATE TABLE IF NOT EXISTS memory
+    ( chat_id INTEGER
+    , message TEXT
+    );
 """
 
 
@@ -78,6 +82,20 @@ def unsubscribe_morning(chat_id: int) -> None:
 def get_morning_subscribers() -> List[int]:
     with _connect() as connection:
         return [chat_id for (chat_id,) in connection.execute("SELECT chat_id FROM morning_subscribers").fetchall()]
+
+
+def append_to_memory(chat_id: int, message: str, limit: Optional[int] = None):
+    with _connect() as connection:
+        connection.execute("INSERT INTO memory (chat_id, message) VALUES (?, ?)", (chat_id, message))
+        if limit is not None:
+            connection.execute("DELETE FROM memory WHERE rowid IN ("
+                               "    SELECT rowid FROM memory WHERE chat_id = ?"
+                               "    ORDER BY rowid DESC LIMIT -1 OFFSET ?)", (chat_id, limit))
+
+
+def get_memory(chat_id: int) -> List[str]:
+    with _connect() as connection:
+        return [message for (message,) in connection.execute("SELECT message FROM memory WHERE chat_id = ?", (chat_id,))]
 
 
 def _connect() -> sqlite3.Connection:

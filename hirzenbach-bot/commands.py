@@ -108,11 +108,12 @@ async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     data = Data.read()
     if not update.effective_chat.id in data.memory:
         data.memory[update.effective_chat.id] = list()
-    chat_memory = _append_to_memory(
+    _append_to_memory(
         update.effective_chat.id,
         update.effective_user.first_name,
         update.effective_message.text,
     )
+    chat_memory = persistance.get_memory(update.effective_chat.id)
 
     reply_to_message = update.effective_message.reply_to_message
     is_reply_to_me = (
@@ -148,14 +149,6 @@ async def code(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_markdown(formatted_code)
 
 
-def _append_to_memory(chat: int, user: str, text: str) -> List[str]:
-    data = Data.read()
-    if not chat in data.memory:
-        data.memory[chat] = list()
-    chat_memory = data.memory[chat]
-    text = f"{user}: {text}"
-    chat_memory.append(text)
-    while len(chat_memory) > 10:
-        chat_memory.pop(0)
-    data.write()
-    return chat_memory
+def _append_to_memory(chat: int, user: str, text: str) -> None:
+    persistance.append_to_memory(chat, f"{user}: {text}", limit=10)
+
