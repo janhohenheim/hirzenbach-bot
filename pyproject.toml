@@ -5,7 +5,7 @@ description = ""
 authors = ["Jan Hohenheim <jan@hohenheim.ch>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "hirzenbach_bot"}]
+packages = [{include = "hirzenbach-bot"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
