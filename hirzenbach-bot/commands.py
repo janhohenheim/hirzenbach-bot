@@ -9,6 +9,7 @@ import random
 import gpt3
 import requests
 from persistance import Data
+import persistance
 
 # Arbitrary, but it seems a gender neutral name gives less mechanical responses
 # than the real name or a typical bot name like "Marv"
@@ -53,14 +54,12 @@ async def add_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     if not data.adding_sticker:
         return
 
-    data.sticker_pool.add(update.message.sticker.file_id)
-    data.write()
+    persistance.add_sticker(update.message.sticker.file_id)
     await update.message.reply_text("Added sticker! You can stop via /stop_add_sticker")
 
 
 async def sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    id = random.choice(list(data.sticker_pool))
+    id = random.choice(persistance.get_stickers())
     await update.message.reply_sticker(id)
 
 

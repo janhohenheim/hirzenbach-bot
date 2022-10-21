@@ -2,6 +2,7 @@ from env import Env
 import time
 import telegram
 from persistance import Data
+import persistance
 import random
 from datetime import timezone, datetime, timedelta
 from gpt3 import complete_prompt
@@ -15,9 +16,9 @@ async def run_regular_spam():
         data = Data.read()
         bot = build_telegram_bot()
         async with bot:
+            stickers = persistance.get_stickers()
             for id in data.sticker_subscribers:
-                data = Data.read()
-                sticker_id = random.choice(list(data.sticker_pool))
+                sticker_id = random.choice(stickers)
                 await bot.send_sticker(id, sticker_id)
 
 
