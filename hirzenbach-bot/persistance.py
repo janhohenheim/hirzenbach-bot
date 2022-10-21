@@ -23,27 +23,6 @@ def init_database() -> None:
     connection.executescript(_SQLITE_SCHEMA)
 
 
-def migrate_stickers_to_sqlite():
-    if len(get_stickers()) == 0:
-        data = Data.read()
-        for sticker in data.sticker_pool:
-            add_sticker(sticker)
-
-
-def migrate_sticker_subscribers_to_sqlite():
-    if len(get_sticker_subscribers()) == 0:
-        data = Data.read()
-        for chat_id in data.sticker_subscribers:
-            subscribe_stickers(chat_id)
-
-
-def migrate_morning_subscribers_to_sqlite():
-    if len(get_morning_subscribers()) == 0:
-        data = Data.read()
-        for chat_id in data.morning_subscribers:
-            subscribe_morning(chat_id)
-
-
 def get_stickers() -> List[str]:
     with _connect() as connection:
         return [sticker_id for (sticker_id,) in connection.execute("SELECT file_id FROM stickers").fetchall()]
