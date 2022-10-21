@@ -14,4 +14,5 @@ subscribe_morning - Subscribe to regular good morning messages
 unsubscribe_morning - Unsubscribe to regular good morning messages
 inspire - Use inspirobot to generate an inspirational quote
 code - Write Python code for you
+forget - Wipes memory of the current chat
 ```

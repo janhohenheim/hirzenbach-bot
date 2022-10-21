@@ -149,6 +149,11 @@ async def code(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_markdown(formatted_code)
 
 
+async def forget(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    persistance.remove_from_memory(update.effective_chat.id)
+    await update.message.reply_text(f"New phone, who dis?")
+
+
 def _append_to_memory(chat: int, user: str, text: str) -> None:
     persistance.append_to_memory(chat, f"{user}: {text}", limit=10)
 

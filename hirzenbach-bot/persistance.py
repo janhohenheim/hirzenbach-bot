@@ -77,6 +77,11 @@ def get_memory(chat_id: int) -> List[str]:
         return [message for (message,) in connection.execute("SELECT message FROM memory WHERE chat_id = ?", (chat_id,))]
 
 
+def remove_from_memory(chat_id: int) -> None:
+    with _connect() as connection:
+        connection.execute("DELETE FROM memory WHERE chat_id = ?", (chat_id,))
+
+
 def _connect() -> sqlite3.Connection:
     return sqlite3.connect(_SQLITE_DATABASE)
 
