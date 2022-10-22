@@ -4,8 +4,8 @@ version = "0.1.0"
 description = ""
 authors = ["Jan Hohenheim <jan@hohenheim.ch>"]
 license = "MIT"
-readme = "README.md"
-packages = [{include = "hirzenbach_bot"}]
+readme = "readme.md"
+packages = [{include = "hirzenbach-bot"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"

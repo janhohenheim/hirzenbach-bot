@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from typing import List
 from telegram import Update
 from telegram.ext import (
     ContextTypes,
@@ -8,7 +7,9 @@ from telegram.ext import (
 import random
 import gpt3
 import requests
-from persistance import Data
+import persistence
+import re
+from vulgar_fraction import VulgarFraction
 
 # Arbitrary, but it seems a gender neutral name gives less mechanical responses
 # than the real name or a typical bot name like "Marv"
@@ -33,50 +34,39 @@ async def there_there(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
 
 async def start_add_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    data.adding_sticker = True
-    data.write()
+    persistence.enable_adding_stickers(update.effective_chat.id)
     await update.message.reply_text("Alright, send the stickers!")
 
 
 async def stop_add_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    data.adding_sticker = False
-    data.write()
+    persistence.disable_adding_stickers(update.effective_chat.id)
     await update.message.reply_text(
         "Stopped adding stickers. You can start again via /add_sticker"
     )
 
 
 async def add_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    if not data.adding_sticker:
+    if not persistence.is_adding_stickers(update.effective_chat.id):
         return
 
-    data.sticker_pool.add(update.message.sticker.file_id)
-    data.write()
+    persistence.add_sticker(update.message.sticker.file_id)
     await update.message.reply_text("Added sticker! You can stop via /stop_add_sticker")
 
 
 async def sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    id = random.choice(list(data.sticker_pool))
+    id = random.choice(persistence.get_stickers())
     await update.message.reply_sticker(id)
 
 
 async def subscribe_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    data.sticker_subscribers.add(update.effective_chat.id)
-    data.write()
+    persistence.subscribe_stickers(update.effective_chat.id)
     await update.message.reply_text(
         "Added to subscribers of scheduled sticker spam. You can unsubscribe via /unsubscribe_sticker"
     )
 
 
 async def subscribe_morning(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    data.morning_subscribers.add(update.effective_chat.id)
-    data.write()
+    persistence.subscribe_morning(update.effective_chat.id)
     await update.message.reply_text(
         "Added to subscribers of scheduled good morning messages. You can unsubscribe via /unsubscribe_morning"
     )
@@ -85,9 +75,7 @@ async def subscribe_morning(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 async def unsubscribe_sticker(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
-    data = Data.read()
-    data.sticker_subscribers.remove(update.effective_chat.id)
-    data.write()
+    persistence.unsubscribe_stickers(update.effective_chat.id)
     await update.message.reply_text(
         "Removed from subscribers of scheduled sticker spam. Subscribe again via /subscribe_sticker"
     )
@@ -96,9 +84,7 @@ async def unsubscribe_sticker(
 async def unsubscribe_morning(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
-    data = Data.read()
-    data.morning_subscribers.remove(update.effective_chat.id)
-    data.write()
+    persistence.unsubscribe_morning(update.effective_chat.id)
     await update.message.reply_text(
         "Removed from subscribers of scheduled good morning messages. Subscribe again via /subscribe_morning"
     )
@@ -113,15 +99,19 @@ async def inspire(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_photo(link)
 
 
+async def fraction(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    nominator = int(context.match.group(1))
+    denominator = int(context.match.group(2))
+    await update.message.reply_text(str(VulgarFraction(nominator, denominator)))
+
+
 async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    if not update.effective_chat.id in data.memory:
-        data.memory[update.effective_chat.id] = list()
-    chat_memory = _append_to_memory(
+    _append_to_memory(
         update.effective_chat.id,
         update.effective_user.first_name,
         update.effective_message.text,
     )
+    chat_memory = persistence.get_memory(update.effective_chat.id)
 
     reply_to_message = update.effective_message.reply_to_message
     is_reply_to_me = (
@@ -157,14 +147,11 @@ async def code(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_markdown(formatted_code)
 
 
-def _append_to_memory(chat: int, user: str, text: str) -> List[str]:
-    data = Data.read()
-    if not chat in data.memory:
-        data.memory[chat] = list()
-    chat_memory = data.memory[chat]
-    text = f"{user}: {text}"
-    chat_memory.append(text)
-    while len(chat_memory) > 10:
-        chat_memory.pop(0)
-    data.write()
-    return chat_memory
+async def forget(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    persistence.remove_from_memory(update.effective_chat.id)
+    await update.message.reply_text(f"New phone, who dis?")
+
+
+def _append_to_memory(chat: int, user: str, text: str) -> None:
+    persistence.append_to_memory(chat, f"{user}: {text}", limit=10)
+

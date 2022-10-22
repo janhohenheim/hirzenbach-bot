@@ -12,7 +12,7 @@ from telegram.ext import (
 from threading import Thread
 import gpt3
 from env import Env
-from persistance import Data
+from persistence import init_database
 import commands
 import scheduled
 
@@ -22,7 +22,7 @@ def _get_spam_thread(callback: Callable) -> Thread:
 
 
 def main():
-    Data.init()
+    init_database()
     gpt3.setup_openai()
     threads = [
         _get_spam_thread(callback)
@@ -43,11 +43,17 @@ def main():
     app.add_handler(CommandHandler("unsubscribe_morning", commands.unsubscribe_morning))
     app.add_handler(CommandHandler("inspire", commands.inspire))
     app.add_handler(CommandHandler("code", commands.code))
+    app.add_handler(CommandHandler("forget", commands.forget))
 
     app.add_handler(MessageHandler(filters.Sticker.ALL, commands.add_sticker))
     app.add_handler(
         MessageHandler(
             filters.Regex("[hH]elp") | filters.Regex("[hH]ilfe"), commands.there_there
+        )
+    )
+    app.add_handler(
+        MessageHandler(
+            filters.Regex('^\\s*(-?\\d+)\\s*/\\s*(-?\\d+)\\s*$'), commands.fraction
         )
     )
     app.add_handler(
