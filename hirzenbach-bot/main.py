@@ -52,6 +52,11 @@ def main():
         )
     )
     app.add_handler(
+        MessageHandler(
+            filters.Regex('^\\s*(-?\\d+)\\s*/\\s*(-?\\d+)\\s*$'), commands.fraction
+        )
+    )
+    app.add_handler(
         MessageHandler(filters.TEXT & (~filters.COMMAND), commands.generic_message)
     )
     app.run_polling()

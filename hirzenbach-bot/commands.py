@@ -15,8 +15,6 @@ from vulgar_fraction import VulgarFraction
 # than the real name or a typical bot name like "Marv"
 BOT_NAME = "Kim"
 
-_FRACTION_REGEX = re.compile('^\\s*(-?\\d+)\\s*/\\s*(-?\\d+)\\s*$')
-
 
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
@@ -101,6 +99,12 @@ async def inspire(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_photo(link)
 
 
+async def fraction(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    nominator = int(context.match.group(1))
+    denominator = int(context.match.group(2))
+    await update.message.reply_text(str(VulgarFraction(nominator, denominator)))
+
+
 async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     _append_to_memory(
         update.effective_chat.id,
@@ -114,11 +118,6 @@ async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         reply_to_message is not None and reply_to_message.from_user.id == context.bot.id
     )
     is_addressing_me = context.bot.name in update.effective_message.text
-
-    fraction_match = _FRACTION_REGEX.match(update.effective_message.text)
-    if fraction_match:
-        await update.message.reply_text(str(VulgarFraction(int(fraction_match.group(1)), int(fraction_match.group(2)))))
-        return
 
     if random.randint(1, 6) == 1 or is_reply_to_me or is_addressing_me:
         prompt = (
