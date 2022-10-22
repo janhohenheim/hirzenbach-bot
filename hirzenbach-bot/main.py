@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 
 import asyncio
-from sched import scheduler
 from typing import Callable
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
     MessageHandler,
     filters,
+    JobQueue,
 )
 from threading import Thread
 import gpt3
 from env import Env
 from persistence import init_database
+from datetime import timedelta, time
 import commands
 import scheduled
 
@@ -24,14 +25,13 @@ def _get_spam_thread(callback: Callable) -> Thread:
 def main():
     init_database()
     gpt3.setup_openai()
-    threads = [
-        _get_spam_thread(callback)
-        for callback in [scheduled.run_morning_spam, scheduled.run_regular_spam]
-    ]
-    for thread in threads:
-        thread.start()
 
-    app = ApplicationBuilder().token(Env.read().telegram_token).build()
+    job_queue = JobQueue()
+    job_queue.scheduler.timezone = scheduled.TIMEZONE
+    app = ApplicationBuilder().job_queue(job_queue).token(Env.read().telegram_token).build()
+
+    job_queue.run_repeating(scheduled.send_sticker_spam, interval=timedelta(hours=1))
+    job_queue.run_daily(scheduled.send_morning_spam, time=time(7, 0))
 
     app.add_handler(CommandHandler("sticker", commands.sticker))
     app.add_handler(CommandHandler("add_sticker", commands.start_add_sticker))
