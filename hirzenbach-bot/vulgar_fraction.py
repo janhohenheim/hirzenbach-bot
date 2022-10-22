@@ -9,6 +9,8 @@ class VulgarFraction:
     """
     >>> str(VulgarFraction(-1234567890, -1234567890))
     '⁻¹²³⁴⁵⁶⁷⁸⁹⁰⁄₋₁₂₃₄₅₆₇₈₉₀'
+    >>> str(VulgarFraction(3, 4))
+    '¾'
     """
     nominator: int
     denominator: int
@@ -82,7 +84,7 @@ def _subscript(character: str) -> str:
 
 
 def _single_character_fraction(fraction: VulgarFraction) -> Optional[str]:
-    match fraction:
+    match (fraction.nominator, fraction.denominator):
         case (1, 4):
             return '\u00bc'
         case (1, 2):
