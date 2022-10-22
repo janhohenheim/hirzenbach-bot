@@ -7,7 +7,6 @@ from telegram.ext import (
 import random
 import gpt3
 import requests
-from persistance import Data
 import persistance
 
 # Arbitrary, but it seems a gender neutral name gives less mechanical responses
@@ -99,9 +98,6 @@ async def inspire(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def generic_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    if not update.effective_chat.id in data.memory:
-        data.memory[update.effective_chat.id] = list()
     _append_to_memory(
         update.effective_chat.id,
         update.effective_user.first_name,
