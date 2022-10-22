@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Set, Dict, List
 import pickle
-from persistance import init_database, add_sticker, subscribe_morning, subscribe_stickers, append_to_memory
+from persistence import init_database, add_sticker, subscribe_morning, subscribe_stickers, append_to_memory
 
 
 @dataclass(frozen=False)

@@ -1,7 +1,7 @@
 from env import Env
 import time
 import telegram
-from persistance import get_sticker_subscribers, get_morning_subscribers, get_stickers
+from persistence import get_sticker_subscribers, get_morning_subscribers, get_stickers
 import random
 from datetime import timezone, datetime, timedelta
 from gpt3 import complete_prompt
