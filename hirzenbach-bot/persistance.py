@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS memory
     ( chat_id INTEGER
     , message TEXT
     );
+CREATE TABLE IF NOT EXISTS sticker_adders
+    ( chat_id INTEGER PRIMARY KEY ON CONFLICT REPLACE);
 """
 
 
@@ -80,6 +82,22 @@ def get_memory(chat_id: int) -> List[str]:
 def remove_from_memory(chat_id: int) -> None:
     with _connect() as connection:
         connection.execute("DELETE FROM memory WHERE chat_id = ?", (chat_id,))
+
+
+def enable_adding_stickers(chat_id: int) -> None:
+    with _connect() as connection:
+        connection.execute("INSERT INTO sticker_adders (chat_id) VALUES (?)", (chat_id,))
+
+
+def disable_adding_stickers(chat_id: int) -> None:
+    with _connect() as connection:
+        connection.execute("DELETE FROM sticker_adders WHERE chat_id = ?", (chat_id,))
+
+
+def is_adding_stickers(chat_id: int) -> bool:
+    with _connect() as connection:
+        result, = connection.execute("SELECT count(1) FROM sticker_adders WHERE chat_id = ?", (chat_id,)).fetchone()
+        return result >= 1
 
 
 def _connect() -> sqlite3.Connection:

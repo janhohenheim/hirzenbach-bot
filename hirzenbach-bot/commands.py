@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from typing import List
 from telegram import Update
 from telegram.ext import (
     ContextTypes,
@@ -34,24 +33,19 @@ async def there_there(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
 
 async def start_add_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    data.adding_sticker = True
-    data.write()
+    persistance.enable_adding_stickers(update.effective_chat.id)
     await update.message.reply_text("Alright, send the stickers!")
 
 
 async def stop_add_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    data.adding_sticker = False
-    data.write()
+    persistance.disable_adding_stickers(update.effective_chat.id)
     await update.message.reply_text(
         "Stopped adding stickers. You can start again via /add_sticker"
     )
 
 
 async def add_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = Data.read()
-    if not data.adding_sticker:
+    if not persistance.is_adding_stickers(update.effective_chat.id):
         return
 
     persistance.add_sticker(update.message.sticker.file_id)
